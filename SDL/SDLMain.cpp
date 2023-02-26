@@ -797,9 +797,7 @@ int main(int argc, char *argv[]) {
 		printf("Init from thread error: '%s'\n", error_message.c_str());
 	}
 
-#ifdef MOBILE_DEVICE
 	SDL_ShowCursor(SDL_DISABLE);
-#endif
 
 	if (!useEmuThread) {
 		NativeInitGraphics(graphicsContext);
@@ -890,12 +888,6 @@ int main(int argc, char *argv[]) {
 						g_Config.iForceFullScreen = -1;
 					}
 
-					// Hide/Show cursor correctly toggling fullscreen
-					if (lastUIState == UISTATE_INGAME && fullscreen && !g_Config.bShowTouchControls) {
-						SDL_ShowCursor(SDL_DISABLE);
-					} else if (lastUIState != UISTATE_INGAME || !fullscreen) {
-						SDL_ShowCursor(SDL_ENABLE);
-					}
 					break;
 				}
 
@@ -1156,15 +1148,6 @@ int main(int argc, char *argv[]) {
 		}
 		if (g_QuitRequested)
 			break;
-#if !defined(MOBILE_DEVICE)
-		if (lastUIState != GetUIState()) {
-			lastUIState = GetUIState();
-			if (lastUIState == UISTATE_INGAME && g_Config.UseFullScreen() && !g_Config.bShowTouchControls)
-				SDL_ShowCursor(SDL_DISABLE);
-			if (lastUIState != UISTATE_INGAME || !g_Config.UseFullScreen())
-				SDL_ShowCursor(SDL_ENABLE);
-		}
-#endif
 
 		// Disabled by default, needs a workaround to map to psp keys.
 		if (g_Config.bMouseControl) {
