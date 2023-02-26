@@ -603,7 +603,7 @@ void NativeInit(int argc, const char *argv[], const char *savegame_dir, const ch
 
 	// Note that if we don't have storage permission here, loading the config will
 	// fail and it will be set to the default. Later, we load again when we get permission.
-	g_Config.Load();
+	g_Config.Load("/recalbox/share/system/configs/ppsspp/PSP/SYSTEM/ppsspp.ini", "/recalbox/share/system/configs/ppsspp/PSP/SYSTEM/controls.ini");
 #endif
 
 	LogManager *logman = LogManager::GetInstance();
