@@ -31,7 +31,7 @@ SDLJoystick::SDLJoystick(bool init_SDL ) : registeredAsEventHandler(false) {
 		SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
 	}
 
-	const char *dbPath = "gamecontrollerdb.txt";
+	const char *dbPath = "/recalbox/share/system/.config/pegasus-frontend/sdl_controllers.txt";
 	cout << "loading control pad mappings from " << dbPath << ": ";
 
 	size_t size;
