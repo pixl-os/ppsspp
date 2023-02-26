@@ -292,6 +292,9 @@ endif()
 
 include_directories("${CMAKE_SOURCE_DIR}")
 
+include_directories(/opt/vc/include /opt/vc/lib/libzip/include)
+link_directories(/opt/vc/lib)
+
 if(USING_EGL)
 	add_definitions(-DUSING_EGL)
 endif()
