@@ -102,6 +102,7 @@ static AVIDump avi;
 static bool frameStep_;
 static int lastNumFlips;
 static bool startDumping;
+bool hkPressed = false;
 
 extern bool g_TakeScreenshot;
 
@@ -589,6 +590,7 @@ void EmuScreen::onVKeyDown(int virtualKeyCode) {
 
 	switch (virtualKeyCode) {
 	case VIRTKEY_FASTFORWARD:
+	case CTRL_RIGHT:
 		if (coreState == CORE_STEPPING) {
 			Core_EnableStepping(false);
 		}
@@ -623,7 +625,22 @@ void EmuScreen::onVKeyDown(int virtualKeyCode) {
 		break;
 
 	case VIRTKEY_PAUSE:
+		hkPressed = true;
+		break;
+
+	case CTRL_START:
+		System_SendMessage("event", "exitprogram");
+		System_SendMessage("finish", "");
+ 		break;
+
+	case CTRL_CROSS:
+		hkPressed = false;
 		pauseTrigger_ = true;
+		break;
+	
+	case CTRL_DOWN:
+		SaveState::PreviousSlot();
+	    NativeMessageReceived("savestate_displayslot", "");
 		break;
 
 	case VIRTKEY_FRAME_ADVANCE:
@@ -680,6 +697,7 @@ void EmuScreen::onVKeyDown(int virtualKeyCode) {
 #endif
 
 	case VIRTKEY_REWIND:
+	case CTRL_LEFT:
 		if (SaveState::CanRewind()) {
 			SaveState::Rewind(&AfterSaveStateAction);
 		} else {
@@ -687,13 +705,20 @@ void EmuScreen::onVKeyDown(int virtualKeyCode) {
 		}
 		break;
 	case VIRTKEY_SAVE_STATE:
+	case CTRL_SQUARE:
 		SaveState::SaveSlot(gamePath_, g_Config.iCurrentStateSlot, &AfterSaveStateAction);
 		break;
 	case VIRTKEY_LOAD_STATE:
+	case CTRL_TRIANGLE:
 		SaveState::LoadSlot(gamePath_, g_Config.iCurrentStateSlot, &AfterSaveStateAction);
 		break;
 	case VIRTKEY_NEXT_SLOT:
+	case CTRL_UP:
 		SaveState::NextSlot();
+		NativeMessageReceived("savestate_displayslot", "");
+		break;
+	case VIRTKEY_PREVIOUS_SLOT:
+		SaveState::PreviousSlot();
 		NativeMessageReceived("savestate_displayslot", "");
 		break;
 	case VIRTKEY_TOGGLE_FULLSCREEN:
@@ -747,6 +772,8 @@ void EmuScreen::onVKeyUp(int virtualKeyCode) {
 
 	switch (virtualKeyCode) {
 	case VIRTKEY_FASTFORWARD:
+	case VIRTKEY_PAUSE:
+		hkPressed = false;
 		PSP_CoreParameter().fastForward = false;
 		break;
 

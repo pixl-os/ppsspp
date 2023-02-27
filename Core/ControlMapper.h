@@ -5,6 +5,8 @@
 
 #include <functional>
 
+extern bool hkPressed;
+
 // Utilities for mapping input events to PSP inputs and virtual keys.
 // Main use is of course from EmuScreen.cpp, but also useful from control settings etc.
 

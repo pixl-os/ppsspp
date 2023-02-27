@@ -229,6 +229,9 @@ void ControlMapper::pspKey(int deviceId, int pspKeyCode, int flags) {
 		if (flags & KEY_UP)
 			__CtrlButtonUp(pspKeyCode);
 	}
+	if ( hkPressed || (__CtrlPeekButtons() & CTRL_SELECT) == CTRL_SELECT ) {
+		onVKeyDown(deviceId, pspKeyCode);
+	}
 }
 
 void ControlMapper::onVKeyDown(int deviceId, int vkey) {
