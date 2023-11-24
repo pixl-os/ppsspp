@@ -1441,9 +1441,7 @@ int main(int argc, char *argv[]) {
 		printf("Init from thread error: '%s'\n", error_message.c_str());
 	}
 
-#ifdef MOBILE_DEVICE
 	SDL_ShowCursor(SDL_DISABLE);
-#endif
 
 	// Ensure that the swap interval is set after context creation (needed for kmsdrm)
 	SDL_GL_SetSwapInterval(1);
