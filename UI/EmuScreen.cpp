@@ -108,6 +108,7 @@ static AVIDump avi;
 static bool frameStep_;
 static int lastNumFlips;
 static bool startDumping;
+bool hkPressed = false;
 
 extern bool g_TakeScreenshot;
 
@@ -653,6 +654,11 @@ void EmuScreen::onVKey(int virtualKeyCode, bool down) {
 			controlMapper_.ForceReleaseVKey(virtualKeyCode);
 		}
 		break;
+	
+	case CTRL_DOWN:
+		SaveState::PreviousSlot();
+	    NativeMessageReceived("savestate_displayslot", "");
+		break;
 
 	case VIRTKEY_FRAME_ADVANCE:
 		if (!Achievements::WarnUserIfChallengeModeActive(false)) {
@@ -742,6 +748,10 @@ void EmuScreen::onVKey(int virtualKeyCode, bool down) {
 			SaveState::NextSlot();
 			System_PostUIMessage(UIMessage::SAVESTATE_DISPLAY_SLOT);
 		}
+		break;
+	case VIRTKEY_PREVIOUS_SLOT:
+		SaveState::PreviousSlot();
+		NativeMessageReceived("savestate_displayslot", "");
 		break;
 	case VIRTKEY_TOGGLE_FULLSCREEN:
 		if (down)

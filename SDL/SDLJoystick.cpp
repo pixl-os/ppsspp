@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <algorithm>
+#include <sstream>
 
 #include "Common/File/FileUtil.h"
 #include "Common/File/VFS/VFS.h"
@@ -12,6 +14,10 @@
 #include "SDL/SDLJoystick.h"
 
 using namespace std;
+
+static bool hotkey = false;
+static bool hotkeyIsNotADedicatedKey = false;
+keycode_t guideCode;
 
 static int SDLJoystickEventHandlerWrapper(void* userdata, SDL_Event* event)
 {
@@ -51,6 +57,10 @@ void SDLJoystick::setUpControllers() {
 	}
 	if (controllers.size() > 0) {
 		cout << "pad 1 has been assigned to control pad: " << SDL_GameControllerName(controllers.front()) << endl;
+		auto mapping = SDL_GameControllerMapping(controllers.front());
+		// Check with mapping if guide and select have the same button, and turn on a flag
+		guideCode = findGuideRealButton(mapping);
+		hotkeyIsNotADedicatedKey = ( guideCode != NKCODE_UNKNOWN );
 	}
 }
 
@@ -165,7 +175,12 @@ void SDLJoystick::ProcessInput(const SDL_Event &event){
 				key.flags = KEY_DOWN;
 				key.keyCode = code;
 				key.deviceId = DEVICE_ID_PAD_0 + getDeviceIndex(event.cbutton.which);
+				keysPressedCombo.push_back(code);
 				NativeKey(key);
+				if (hotkeyIsNotADedicatedKey and (code == guideCode)) {
+					key.keyCode = NKCODE_BACK;
+					NativeKey(key);
+				}
 			}
 		}
 		break;
@@ -178,6 +193,10 @@ void SDLJoystick::ProcessInput(const SDL_Event &event){
 				key.keyCode = code;
 				key.deviceId = DEVICE_ID_PAD_0 + getDeviceIndex(event.cbutton.which);
 				NativeKey(key);
+				if (code == NKCODE_BUTTON_9 and hotkeyIsNotADedicatedKey) {
+					key.keyCode = NKCODE_BACK;
+					NativeKey(key);
+				}
 			}
 		}
 		break;
@@ -220,6 +239,10 @@ void SDLJoystick::ProcessInput(const SDL_Event &event){
 		setUpController(event.cdevice.which);
 		if (prevNumControllers == 0 && controllers.size() > 0) {
 			cout << "pad 1 has been assigned to control pad: " << SDL_GameControllerName(controllers.front()) << endl;
+			auto mapping = SDL_GameControllerMapping(controllers.front());
+			// Check with mapping if guide and select have the same button, and turn on a flag
+			guideCode = findGuideRealButton(mapping);
+			hotkeyIsNotADedicatedKey = ( guideCode != NKCODE_UNKNOWN );
 		}
 		break;
 	}
@@ -232,4 +255,30 @@ int SDLJoystick::getDeviceIndex(int instanceId) {
 			return -1;
 	}
 	return it->second;
+}
+
+// Hack for people whose HK is not a dedicated button
+keycode_t SDLJoystick::findGuideRealButton(const char* mapping) {
+	std::string s, guideStringCode, guideString;
+	std::istringstream f(mapping);
+	size_t pos;
+
+	while (getline(f, s, ',')) {
+		if (pos=s.find("guide:b") != std::string::npos) {
+			guideString = s;
+			guideStringCode = s.substr(7); // thats length of guide:b
+			break;
+		}
+	}
+
+	s.clear();
+	while (getline(f, s, ',')) {
+		if (pos=s.find(guideStringCode) != std::string::npos and s != guideString) {
+			s = s.substr(0, s.find(':'));
+			if (pos=s.find("back") != std::string::npos) { return NKCODE_BUTTON_9; }
+			if (pos=s.find("leftstick") != std::string::npos) { return NKCODE_BUTTON_THUMBL; }
+			if (pos=s.find("rightstick") != std::string::npos) { return NKCODE_BUTTON_THUMBR; }
+		}
+	}
+	return NKCODE_UNKNOWN;
 }

@@ -540,6 +540,9 @@ void ControlMapper::PSPKey(int deviceId, int pspKeyCode, int flags) {
 		if (flags & KEY_UP)
 			updatePSPButtons_(0, pspKeyCode);
 	}
+	if ( hkPressed || (__CtrlPeekButtons() & CTRL_SELECT) == CTRL_SELECT ) {
+		onVKeyDown(deviceId, pspKeyCode);
+	}
 }
 
 void ControlMapper::onVKeyAnalog(int deviceId, int vkey, float value) {
